@@ -1,0 +1,35 @@
+{% extends "store/base.html" %}
+{% block title %}{{ product.name }} — Swamp & Black{% endblock %}
+{% block content %}
+  <div class="section" style="display:grid;grid-template-columns:1.1fr 1fr;gap:24px">
+    <div class="card">
+      <div class="card-media" style="aspect-ratio: 1/1">
+        {% if product.image %}
+          <img src="{{ product.image.url }}" alt="{{ product.name }}">
+        {% else %}
+          <img src="https://images.unsplash.com/photo-1520975916090-3105956dac38?q=80&w=1200&auto=format&fit=crop" alt="{{ product.name }}">
+        {% endif %}
+      </div>
+    </div>
+    <div>
+      <h1>{{ product.name }}</h1>
+      <p class="price" style="font-size:1.6rem">{{ product.price }} ₽</p>
+      <p class="subtle">Остаток: {{ product.quantity }}</p>
+
+      <div style="display:flex;gap:10px;align-items:center;margin:14px 0 18px">
+        <label class="subtle">Количество:</label>
+        <input id="qty" type="number" min="1" value="1" style="width:120px">
+      </div>
+
+      <button class="btn" onclick="
+        const qty = document.getElementById('qty').value;
+        post('{% url 'api_add_to_cart' product_id=product.id %}', {qty})
+          .then(r=>alert(r.ok?('Добавлено, теперь в корзине: '+r.qty):r.error));
+      ">Добавить в корзину</button>
+
+      <div class="section" style="margin-top:18px">
+        <p class="subtle">Доставка по городу — завтра, самовывоз — сегодня. Возврат — 14 дней.</p>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "store/base.html" %}
+{% block title %}Каталог — Swamp & Black{% endblock %}
+{% block content %}
+  <section class="section">
+    <h1>Каталог</h1>
+    <p class="subtle">Выбирайте: тёмный лес и болотные акценты.</p>
+  </section>
+
+  <div class="grid">
+    {% for p in products %}
+      <article class="card">
+        <a class="card-media" href="{% url 'product_detail' slug=p.slug %}">
+          {% if p.image %}
+            <img src="{{ p.image.url }}" alt="{{ p.name }}">
+          {% else %}
+            <img src="https://images.unsplash.com/photo-1520975916090-3105956dac38?q=80&w=1200&auto=format&fit=crop" alt="{{ p.name }}">
+          {% endif %}
+        </a>
+
+        <div class="card-body">
+          <h3 class="card-caption"><a href="{% url 'product_detail' slug=p.slug %}">{{ p.name }}</a></h3>
+          <div class="price">{{ p.price }} ₽</div>
+          <div class="stock">Остаток: {{ p.quantity }}</div>
+          <div style="margin-top:10px">
+            <button class="btn"
+                    onclick="post('{% url 'api_add_to_cart' product_id=p.id %}', {qty:1}).then(r=>alert(r.ok?('В корзине: '+r.qty):r.error))">
+              В корзину
+            </button>
+          </div>
+        </div>
+      </article>
+    {% empty %}
+      <p>Товары появятся скоро.</p>
+    {% endfor %}
+  </div>
+{% endblock %}
