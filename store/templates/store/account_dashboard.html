@@ -1,0 +1,31 @@
+{% extends "store/base.html" %}
+{% block title %}Мой аккаунт — Swamp & Black{% endblock %}
+{% block content %}
+  <div class="section">
+    <h1>Мой аккаунт</h1>
+    <p class="subtle">Здравствуйте, {{ request.user.username }}.</p>
+  </div>
+
+  <div class="section">
+    <h3>Мои заказы</h3>
+    {% if orders %}
+      <ul class="cart-list">
+        {% for o in orders %}
+          <li class="cart-item">
+            <div>
+              <div><strong>Заказ № {{ o.number }}</strong></div>
+              <div class="subtle">{{ o.created_at|date:"d.m.Y H:i" }} • {{ o.email }}</div>
+            </div>
+            <div style="display:flex;gap:14px;align-items:center">
+              <span class="subtle">Статус: <b>{{ o.status }}</b></span>
+              <span class="price">{{ o.total }} ₽</span>
+              <a class="btn" href="{% url 'order_detail' number=o.number %}">Открыть</a>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="subtle">Пока нет заказов.</p>
+    {% endif %}
+  </div>
+{% endblock %}

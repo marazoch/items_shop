@@ -1,0 +1,18 @@
+{% extends "store/base.html" %}
+{% block title %}Регистрация — Swamp & Black{% endblock %}
+{% block content %}
+  <div class="section" style="max-width:480px;margin:0 auto">
+    <h1>Регистрация</h1>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <div style="display:grid;gap:12px;margin-top:12px">
+        {{ form.username.label_tag }} {{ form.username }}
+        {{ form.password1.label_tag }} {{ form.password1 }}
+        {{ form.password2.label_tag }} {{ form.password2 }}
+        <button class="btn" type="submit">Создать аккаунт</button>
+      </div>
+    </form>
+    <p class="subtle" style="margin-top:12px">Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a></p>
+  </div>
+{% endblock %}

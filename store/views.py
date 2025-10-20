@@ -3,6 +3,11 @@ from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_http_methods
 from .models import Product, Category
 from .services import get_or_create_cart, add_to_cart, update_item_qty, apply_coupon, checkout
+from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.shortcuts import redirect
+from django.db.models import Q
 
 def ensure_session(request):
     if not request.session.session_key:
@@ -64,7 +69,7 @@ def api_checkout(request):
     if not email:
         return HttpResponseBadRequest("email required")
     try:
-        order = checkout(cart, email)
+        order = checkout(cart, email, user=request.user)  # ← НОВОЕ
         return JsonResponse({"ok": True, "order": order.number, "total": float(order.total)})
     except Exception as e:
         return JsonResponse({"ok": False, "error": str(e)}, status=400)
@@ -72,3 +77,53 @@ def api_checkout(request):
 def product_detail(request, slug):
     product = get_object_or_404(Product, slug=slug, is_active=True)
     return render(request, "store/product_detail.html", {"product": product})
+
+def register_view(request):
+    if request.user.is_authenticated:
+        return redirect("account")
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect("account")
+    else:
+        form = UserCreationForm()
+    return render(request, "store/auth_register.html", {"form": form})
+
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect("account")
+    if request.method == "POST":
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect("account")
+    else:
+        form = AuthenticationForm(request)
+    return render(request, "store/auth_login.html", {"form": form})
+
+def logout_view(request):
+    logout(request)
+    return redirect("product_list")
+
+@login_required
+def account_dashboard(request):
+    """
+    Показываем заказы пользователя (привязанные по FK) + заказы на его email (если такие есть),
+    чтобы покрыть случаи оформления без авторизации.
+    """
+    from .models import Order
+    qs = Order.objects.filter(Q(user=request.user) | Q(email=request.user.email)).order_by("-created_at")
+    return render(request, "store/account_dashboard.html", {"orders": qs})
+
+@login_required
+def order_detail(request, number):
+    from .models import Order, OrderItem
+    order = get_object_or_404(Order, number=number)
+    # доступ — если это его заказ (по user) или совпадает email
+    if not (order.user == request.user or order.email == request.user.email):
+        return redirect("account")
+    items = order.items.all()
+    return render(request, "store/order_detail.html", {"order": order, "items": items})

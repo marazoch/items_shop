@@ -1,0 +1,25 @@
+{% extends "store/base.html" %}
+{% block title %}Заказ {{ order.number }} — Swamp & Black{% endblock %}
+{% block content %}
+  <div class="section">
+    <h1>Заказ № {{ order.number }}</h1>
+    <p class="subtle">
+      Создан: {{ order.created_at|date:"d.m.Y H:i" }} • Email: {{ order.email }} • Статус: <b>{{ order.status }}</b>
+    </p>
+    <p class="price" style="font-size:1.2rem">Итого: {{ order.total }} ₽</p>
+  </div>
+
+  <div class="section">
+    <h3>Состав заказа</h3>
+    <ul class="cart-list">
+      {% for it in items %}
+        <li class="cart-item">
+          <div><strong>{{ it.product_name }}</strong></div>
+          <div class="price">{{ it.price }} ₽ × {{ it.qty }}</div>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <p><a class="btn" href="{% url 'account' %}">Назад к заказам</a></p>
+{% endblock %}

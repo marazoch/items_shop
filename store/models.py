@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.utils import timezone
+from django.conf import settings
 
 class Category(models.Model):
     name = models.CharField(max_length=120, unique=True)
@@ -67,8 +68,15 @@ class Order(models.Model):
     number = models.CharField(max_length=20, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     email = models.EmailField()
+    user = models.ForeignKey(  # ← НОВОЕ
+        settings.AUTH_USER_MODEL,
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='orders'
+    )
     total = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=20, default='new', choices=[('new','New'),('paid','Paid'),('cancelled','Cancelled')])
+    status = models.CharField(max_length=20, default='new', choices=[('new','New'),('paid','Paid'),('cancelled',
+                                                                                                    'Cancelled')])
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)

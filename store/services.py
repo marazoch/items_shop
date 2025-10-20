@@ -43,7 +43,7 @@ def apply_coupon(cart: Cart, code: str):
     return coupon
 
 @transaction.atomic
-def checkout(cart: Cart, email: str) -> Order:
+def checkout(cart: Cart, email: str, user=None) -> Order:
     for it in cart.items.select_related('product'):
         if it.product.quantity < it.qty:
             raise ValueError(f"Товара '{it.product.name}' недостаточно на складе")
@@ -51,6 +51,7 @@ def checkout(cart: Cart, email: str) -> Order:
     order = Order.objects.create(
         number=get_random_string(10).upper(),
         email=email,
+        user=user if user and getattr(user, "is_authenticated", False) else None,  # ← НОВОЕ
         total=cart.total()
     )
 

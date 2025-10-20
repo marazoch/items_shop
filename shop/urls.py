@@ -15,6 +15,12 @@ urlpatterns = [
     path("api/cart/qty/<int:product_id>/", v.api_update_qty, name="api_update_qty"),
     path("api/cart/apply-coupon/", v.api_apply_coupon, name="api_apply_coupon"),
     path("api/checkout/", v.api_checkout, name="api_checkout"),
+
+    path("account/login/", v.login_view, name="login"),
+    path("account/register/", v.register_view, name="register"),
+    path("account/logout/", v.logout_view, name="logout"),
+    path("account/", v.account_dashboard, name="account"),
+    path("account/orders/<str:number>/", v.order_detail, name="order_detail"),
 ]
 
 if settings.DEBUG:
