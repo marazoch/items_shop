@@ -3,11 +3,13 @@ from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_http_methods
 from .models import Product, Category
 from .services import get_or_create_cart, add_to_cart, update_item_qty, apply_coupon, checkout
+from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import redirect
 from django.db.models import Q
+from .forms import RegistrationForm
 
 def ensure_session(request):
     if not request.session.session_key:
@@ -82,13 +84,14 @@ def register_view(request):
     if request.user.is_authenticated:
         return redirect("account")
     if request.method == "POST":
-        form = UserCreationForm(request.POST)
+        form = RegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
+            messages.success(request, "Регистрация прошла успешно! Добро пожаловать 👋")
             return redirect("account")
     else:
-        form = UserCreationForm()
+        form = RegistrationForm()
     return render(request, "store/auth_register.html", {"form": form})
 
 def login_view(request):
@@ -99,6 +102,7 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
+            messages.success(request, "Вы успешно вошли в аккаунт.")
             return redirect("account")
     else:
         form = AuthenticationForm(request)

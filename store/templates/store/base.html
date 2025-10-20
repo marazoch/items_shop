@@ -28,6 +28,13 @@
   </header>
 
   <main class="container">
+    {% if messages %}
+      <div class="section" style="margin-top:12px">
+        {% for message in messages %}
+          <div class="subtle">{% if message.tags %}<b>{{ message.tags|capfirst }}:</b> {% endif %}{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
     {% block content %}{% endblock %}
   </main>
 
