@@ -21,7 +21,6 @@
           <button class="qty-btn" aria-label="Увеличить" onclick="changeQty({{ it.product.id }}, {{ it.qty|add:'1' }})">+</button>
 
           <div class="price" style="min-width:120px;text-align:right">{{ it.subtotal }} ₽</div>
-
           <button class="btn-danger" onclick="removeItem({{ it.product.id }})" title="Удалить">Удалить</button>
         </div>
       </li>
@@ -44,16 +43,40 @@
     </div>
   </div>
 
-  <div class="section">
-    <h3>Оформление заказа</h3>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <input id="email" type="email" placeholder="email для чека/связи" style="max-width:320px">
-      <button class="btn" onclick="post('{% url 'api_checkout' %}', {email: document.getElementById('email').value})
-                .then(r=>{ if(r.ok){ alert('Заказ '+r.order+' на сумму '+r.total); location.href='/' } else alert(r.error) })">
-        Оплатить (эмуляция)
-      </button>
+  {% if request.user.is_authenticated %}
+    <div class="section">
+      <h3>Подтверждение покупки</h3>
+      {% if not request.user.email %}
+        <p class="subtle">У вашего аккаунта не указан email. Пожалуйста, укажите email для чека/связи:</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <input id="email" type="email" placeholder="email для чека/связи" style="max-width:320px">
+          <button class="btn" onclick="confirmOrder()">
+            Подтвердить покупку
+          </button>
+        </div>
+      {% else %}
+        <p class="subtle">Email для чека/связи: <b>{{ request.user.email }}</b></p>
+        <button class="btn" onclick="confirmOrder()">
+          Подтвердить покупку
+        </button>
+      {% endif %}
     </div>
-  </div>
+  {% else %}
+
+    <div class="section">
+      <h3>Оформление заказа</h3>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+        <a class="btn" href="{% url 'login' %}?next=/cart/">Войти</a>
+        <a class="btn" href="{% url 'register' %}?next=/cart/">Зарегистрироваться</a>
+        <span class="subtle">или</span>
+        <input id="email" type="email" placeholder="email для чека/связи (гостевой заказ)" style="max-width:320px">
+        <button class="btn" onclick="confirmOrder()">
+          Купить как гость
+        </button>
+      </div>
+      <p class="subtle" style="margin-top:8px">Войдя, вы сможете отслеживать заказы в личном кабинете.</p>
+    </div>
+  {% endif %}
 
   <script>
     function changeQty(productId, qty) {
@@ -65,6 +88,16 @@
     function removeItem(productId) {
       post('{% url "api_update_qty" product_id=0 %}'.replace('/0/', '/'+productId+'/'), {qty:0})
         .then(()=>location.reload());
+    }
+    function confirmOrder() {
+      const emailInput = document.getElementById('email');
+      const payload = {};
+      if (emailInput && emailInput.value) payload.email = emailInput.value;
+      post('{% url "api_checkout" %}', payload)
+        .then(r=>{
+          if(r.ok){ alert('Заказ '+r.order+' на сумму '+r.total); location.href='/' }
+          else { alert(r.error) }
+        });
     }
   </script>
 {% endblock %}

@@ -3,6 +3,7 @@ from django.urls import path
 from store import views as v
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -21,6 +22,23 @@ urlpatterns = [
     path("account/logout/", v.logout_view, name="logout"),
     path("account/", v.account_dashboard, name="account"),
     path("account/orders/<str:number>/", v.order_detail, name="order_detail"),
+
+    path("account/password-reset/", auth_views.PasswordResetView.as_view(
+        template_name="store/password_reset_form.html",
+        email_template_name="store/password_reset_email.txt",
+        subject_template_name="store/password_reset_subject.txt",
+        success_url="/account/password-reset/done/"
+    ), name="password_reset"),
+    path("account/password-reset/done/", auth_views.PasswordResetDoneView.as_view(
+        template_name="store/password_reset_done.html"
+    ), name="password_reset_done"),
+    path("account/reset/<uidb64>/<token>/", auth_views.PasswordResetConfirmView.as_view(
+        template_name="store/password_reset_confirm.html",
+        success_url="/account/reset/done/"
+    ), name="password_reset_confirm"),
+    path("account/reset/done/", auth_views.PasswordResetCompleteView.as_view(
+        template_name="store/password_reset_complete.html"
+    ), name="password_reset_complete"),
 ]
 
 if settings.DEBUG:
