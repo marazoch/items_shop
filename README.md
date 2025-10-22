@@ -12,7 +12,6 @@
 ## Стек
 - Python 3.12+
 - Django 5.x (SQLite по умолчанию)
-- Gunicorn (для Docker)
 
 ---
 
@@ -29,11 +28,6 @@ python manage.py runserver
 
 Зайдите в `/admin/` и создайте категории, товары и (опционально) промокод.
 
-## Docker
-
-```bash
-docker compose up --build
-# http://127.0.0.1:8000/
 ```
 
 ## URL
@@ -42,7 +36,3 @@ docker compose up --build
 - `/cart/` — корзина
 - `/api/cart/add/<id>/`, `/api/cart/qty/<id>/`, `/api/cart/apply-coupon/`, `/api/checkout/`
 
-## Быстрые заметки продакшена
-- Установите переменные окружения: `DJANGO_SECRET_KEY`, `DJANGO_DEBUG=0`, `DJANGO_ALLOWED_HOSTS`.
-- Настройте базу данных (PostgreSQL) и статику (nginx).
-- Для внешних клиентов вынесите JSON‑эндпоинты на DRF.
