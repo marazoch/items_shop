@@ -12,8 +12,6 @@
 ## Стек
 - Python 3.12+
 - Django 5.x (SQLite по умолчанию)
-- Gunicorn (для Docker)
-
 ---
 
 ## Локальный запуск
@@ -48,3 +46,4 @@ docker compose exec web python manage.py collectstatic --noinput
 - `/product/<slug>/` — карточка товара
 - `/cart/` — корзина
 - `/api/cart/add/<id>/`, `/api/cart/qty/<id>/`, `/api/cart/apply-coupon/`, `/api/checkout/`
+
