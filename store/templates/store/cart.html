@@ -1,0 +1,103 @@
+{% extends "store/base.html" %}
+{% block title %}Корзина — Swamp & Black{% endblock %}
+{% block content %}
+  <h1>Корзина</h1>
+
+  <ul class="cart-list">
+    {% for it in cart.items.all %}
+      <li class="cart-item">
+        <div style="display:flex;gap:12px;align-items:center">
+          <div class="brand-badge"></div>
+          <div>
+            <div><strong>{{ it.product.name }}</strong></div>
+            <div class="subtle">{{ it.product.price }} ₽ за шт.</div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="qty-btn" aria-label="Уменьшить" onclick="changeQty({{ it.product.id }}, {{ it.qty|add:'-1' }})">–</button>
+          <input type="number" value="{{ it.qty }}" min="1" style="width:72px;text-align:center"
+                 onchange="changeQty({{ it.product.id }}, this.value)">
+          <button class="qty-btn" aria-label="Увеличить" onclick="changeQty({{ it.product.id }}, {{ it.qty|add:'1' }})">+</button>
+
+          <div class="price" style="min-width:120px;text-align:right">{{ it.subtotal }} ₽</div>
+          <button class="btn-danger" onclick="removeItem({{ it.product.id }})" title="Удалить">Удалить</button>
+        </div>
+      </li>
+    {% empty %}
+      <li class="cart-item"><span class="subtle">Корзина пуста</span></li>
+    {% endfor %}
+  </ul>
+
+  <div class="section">
+    <p>Подытог: <b class="price">{{ cart.subtotal }}</b> ₽</p>
+    <p>Скидка: <b class="price">{{ cart.discount_amount }}</b> ₽</p>
+    <p>Итого: <b class="price" style="font-size:1.2rem">{{ cart.total }}</b> ₽</p>
+
+    <div style="display:flex;gap:10px;align-items:center;margin-top:10px">
+      <input id="coupon" placeholder="Промокод" style="max-width:220px">
+      <button class="btn" onclick="post('{% url 'api_apply_coupon' %}', {code: document.getElementById('coupon').value})
+                  .then(r=>{ if(r.ok){alert('Применён: '+r.coupon); location.reload()} else alert(r.error) })">
+        Применить
+      </button>
+    </div>
+  </div>
+
+  {% if request.user.is_authenticated %}
+    <div class="section">
+      <h3>Подтверждение покупки</h3>
+      {% if not request.user.email %}
+        <p class="subtle">У вашего аккаунта не указан email. Пожалуйста, укажите email для чека/связи:</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <input id="email" type="email" placeholder="email для чека/связи" style="max-width:320px">
+          <button class="btn" onclick="confirmOrder()">
+            Подтвердить покупку
+          </button>
+        </div>
+      {% else %}
+        <p class="subtle">Email для чека/связи: <b>{{ request.user.email }}</b></p>
+        <button class="btn" onclick="confirmOrder()">
+          Подтвердить покупку
+        </button>
+      {% endif %}
+    </div>
+  {% else %}
+
+    <div class="section">
+      <h3>Оформление заказа</h3>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+        <a class="btn" href="{% url 'login' %}?next=/cart/">Войти</a>
+        <a class="btn" href="{% url 'register' %}?next=/cart/">Зарегистрироваться</a>
+        <span class="subtle">или</span>
+        <input id="email" type="email" placeholder="email для чека/связи (гостевой заказ)" style="max-width:320px">
+        <button class="btn" onclick="confirmOrder()">
+          Купить как гость
+        </button>
+      </div>
+      <p class="subtle" style="margin-top:8px">Войдя, вы сможете отслеживать заказы в личном кабинете.</p>
+    </div>
+  {% endif %}
+
+  <script>
+    function changeQty(productId, qty) {
+      qty = parseInt(qty, 10);
+      if (isNaN(qty) || qty < 1) qty = 1;
+      post('{% url "api_update_qty" product_id=0 %}'.replace('/0/', '/'+productId+'/'), {qty})
+        .then(()=>location.reload());
+    }
+    function removeItem(productId) {
+      post('{% url "api_update_qty" product_id=0 %}'.replace('/0/', '/'+productId+'/'), {qty:0})
+        .then(()=>location.reload());
+    }
+    function confirmOrder() {
+      const emailInput = document.getElementById('email');
+      const payload = {};
+      if (emailInput && emailInput.value) payload.email = emailInput.value;
+      post('{% url "api_checkout" %}', payload)
+        .then(r=>{
+          if(r.ok){ alert('Заказ '+r.order+' на сумму '+r.total); location.href='/' }
+          else { alert(r.error) }
+        });
+    }
+  </script>
+{% endblock %}
