@@ -1,49 +1,66 @@
-# Django Shop (MVP)
+<p align="center">
+  <img src="static/img/logo.svg" width="140" alt="Items Shop logo">
+</p>
 
-Минимально-рабочий интернет‑магазин на Django: каталог, корзина в БД (по сессии), промокоды, оформление заказа с проверкой остатков (atomic).
+<h1 align="center">🛍️ Items Shop</h1>
 
-## Возможности
-- Каталог товаров (категории, товары, активность).
-- Корзина хранится в БД, связка по `session_key`.
-- Промокоды (процентная скидка, окно действия, флаг активности).
-- Оформление заказа: создаёт Order/OrderItem, списывает склад.
-- Интерактивность через AJAX `fetch` (POST) с CSRF, состояния сохраняются.
+<p align="center">
+  Минималистичный интернет-магазин на <b>Django</b> с корзиной, авторизацией и личным кабинетом.
+  <br>
+  Проект демонстрирует базовую бизнес-логику e-commerce: товары, заказы, купоны, регистрацию и оплату (без шлюза).
+</p>
 
-## Стек
-- Python 3.12+
-- Django 5.x (SQLite по умолчанию)
 ---
 
-## Локальный запуск
+## 🌿 Скриншоты интерфейса
+
+| Главная | Карточка товара | Корзина | Личный кабинет |
+|----------|----------------|----------|----------------|
+| ![Главная](static/screenshots/main.png) | ![Карточка](static/screenshots/product.png) | ![Корзина](static/screenshots/cart.png) | ![Кабинет](static/screenshots/account.png) |
+
+---
+
+## 🚀 Быстрый старт (локально)
+
+### 1️⃣ Репозиторий
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py seed_shop
-python manage.py createsuperuser  # опционально
-python manage.py runserver
+  git clone https://github.com/marazoch/items_shop
+  cd items_shop
 ```
 
-Зайдите в `/admin/` и создайте категории, товары и (опционально) промокод.
-
-## Docker
+### 2️⃣ Виртуальное окружение и зависимости
 
 ```bash
-cp .env.example .env
-docker compose build
-docker compose up -d
-docker compose exec web python manage.py migrate
-docker compose exec web python manage.py createsuperuser
-# (опционально)
-docker compose exec web python manage.py collectstatic --noinput
+  python -m venv .venv
+  .venv\Scripts\activate       # Windows
+  # или source .venv/bin/activate для macOS/Linux
 
+  pip install -r requirements.txt
+```
+### 3️⃣ Миграции и создание суперпользователя
+```bash
+  python manage.py makemigrations
+  python manage.py migrate
+  python manage.py createsuperuser
+```
+### 4️⃣ Тестовые данные
+
+```bash
+  python manage.py seed_shop
 ```
 
-## URL
-- `/` — каталог
-- `/product/<slug>/` — карточка товара
-- `/cart/` — корзина
-- `/api/cart/add/<id>/`, `/api/cart/qty/<id>/`, `/api/cart/apply-coupon/`, `/api/checkout/`
-
+### 5️⃣ Запуск сервера
+```bash
+  python manage.py runserver
+  #http://127.0.0.1:8000
+```
+---
+### Docker
+```bash
+  cp .env.example .env
+  docker compose build
+  docker compose up -d
+  docker compose exec web python manage.py migrate
+  docker compose exec web python manage.py createsuperuser
+```
