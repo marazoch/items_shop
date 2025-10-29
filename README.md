@@ -23,6 +23,7 @@ python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 python manage.py migrate
+python manage.py seed_shop
 python manage.py createsuperuser  # опционально
 python manage.py runserver
 ```
@@ -32,8 +33,14 @@ python manage.py runserver
 ## Docker
 
 ```bash
-docker compose up --build
-# http://127.0.0.1:8000/
+cp .env.example .env
+docker compose build
+docker compose up -d
+docker compose exec web python manage.py migrate
+docker compose exec web python manage.py createsuperuser
+# (опционально)
+docker compose exec web python manage.py collectstatic --noinput
+
 ```
 
 ## URL
@@ -41,8 +48,3 @@ docker compose up --build
 - `/product/<slug>/` — карточка товара
 - `/cart/` — корзина
 - `/api/cart/add/<id>/`, `/api/cart/qty/<id>/`, `/api/cart/apply-coupon/`, `/api/checkout/`
-
-## Быстрые заметки продакшена
-- Установите переменные окружения: `DJANGO_SECRET_KEY`, `DJANGO_DEBUG=0`, `DJANGO_ALLOWED_HOSTS`.
-- Настройте базу данных (PostgreSQL) и статику (nginx).
-- Для внешних клиентов вынесите JSON‑эндпоинты на DRF.
